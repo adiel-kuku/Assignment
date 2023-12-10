@@ -1,0 +1,50 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+import matplotlib.pyplot as plt
+
+products = []   # List to store names of the products
+prices = []     # List to store prices of the products
+ratings = []    # List to store ratings of the products
+
+# Replace the URL with the one you want to analyze
+url = "https://example.com/category"
+response = requests.get(url)
+soup = BeautifulSoup(response.content, 'html.parser')
+
+for each in soup.find_all('a', href=True, attrs={'class':'your_class_name'}):
+    name = each.find('div', attrs={'class':'your_name_class'})
+    price = each.find('div', attrs={'class':'your_price_class'})
+    rate = each.find('div', attrs={'class':'your_rating_class'})
+
+    if name is None:
+        products.append(None)
+    else:
+        products.append(name.text)
+
+    if price is None:
+        prices.append(None)
+    else:
+        prices.append(price.text)
+
+    if rate is None:
+        ratings.append(None)
+    else:
+        ratings.append(rate.text)
+
+# Structuring and storing data
+df = pd.DataFrame({'Product Name': products, 'Price': prices, 'Rating': ratings}) 
+print(df.to_string())
+
+# Output the DataFrame to CSV file
+df.to_csv('products.csv', index=False)
+
+# Data Visualization
+df2 = pd.read_csv("products.csv")
+
+plt.xlabel("Rating")
+plt.ylabel("Price")
+plt.title("Rating against Price")
+
+plt.scatter(df2.Rating, df2.Price, marker="*", c='purple', alpha=1)
+plt.show()
